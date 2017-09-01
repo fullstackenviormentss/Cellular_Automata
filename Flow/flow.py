@@ -22,7 +22,7 @@ from os import system
 
 RESET_TO_TOP_LEFT = "\x1b[0;0H"
 
-if platform == "linux":
+if platform == "linux" or platform == "darwin":
     CLR = "clear"
 elif platform == "win32":
     CLR = "cls"
