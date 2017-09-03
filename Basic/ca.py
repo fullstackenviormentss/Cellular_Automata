@@ -2,7 +2,13 @@ from time import sleep
 from sys import argv
 from os import system
 
-system("clear")  # Clear terminal
+# Clear terminal window
+if platform == "linux" or platform == "darwin":
+    system("clear")
+elif platform == "win32":
+    system("cls")
+else:
+    raise EnvironmentError("OS not recognized")
 
 LEN = int(argv[1])
 MIDDLE = int(LEN/2)
