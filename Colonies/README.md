@@ -10,13 +10,14 @@ Each cell has these properties:
  - Colony (Colour e.g. Purple)
  - Strength (INT e.g. 10)
  - Health (INT e.g. 10)
- - Age (INT e.g. 3 Generations)
+ - Age (INT e.g. 30 Generations)
  - Sex (BOOL, e.g. true = female, false = male)
-  
+ - Days since breeding (only for female) (INT e.g. 6 Generations)
+
 Each generation, these things happen:
  - If a female cell has a neighbouring male cell of the same colony,
-   has a neightbouring cell that has nothing living in it, and has
-   not bred for 10 generations (value may be edited in future), then
+   has a neighbouring cell that has nothing living in it, and has
+   not bred for 10* generations (value may be edited in future), then
    place a new cell of age 0 in the / one of the blank neighbours.
     + Each time a new cell is born, it inherits its mothers colony,
       health & strength and has a random chance of being either sex.
@@ -26,15 +27,14 @@ Each generation, these things happen:
       example, cell 1 has a health of 10 and strength of 5, whilst cell
       2 has health of 10 and strength of 20. cell 1 looses 20 health
       (so is killed) and cell 2 looses 5 health, so still has 5 left
- - If a cell has a free space in it's neighbours, it moves there
  - Each cell ages 1 each generation
 
 Each generation is worked out like this:
  - Calculate & Apply breeding rules
  - Calculate & Apply fighting rules
- - Calculate & Apply moving rules
  - Calculate & Apply new age to cells
 
 ## Demos
 
-p5.js -> Demo in p5.js| [coming soon]
+p5.js -> Demo in p5.js | [coming soon]
+ - colonies: 0 = orange, 1 = green, 2 = blue
