@@ -1,3 +1,11 @@
+/*
+
+Things to change back after moving fixed:
+ - change new cell sex back to random chance
+ - un-comment all initially spawned cells
+
+*/
+
 // In this script, 0 = male, 1 = female
 var MALE = 0;
 var FEMALE = 1;
@@ -19,7 +27,12 @@ function setup() {
   CELL_SIZE = VIS_ROWS/CA_ROWS;
 
   // 2 colours per colony, for male & female. Female = lighter
-  COLONIES = [[color(204, 102, 0), color(204, 155, 0)], [color(146, 141, 0), color(146, 197, 0)], [color(84, 24, 203), color(84, 183, 203)]];
+  COLONIES = [
+    [color(204, 102, 0), color(204, 155, 0)],
+    [color(146, 141, 0), color(146, 197, 0)],
+    [color(84, 24, 203), color(84, 183, 203)],
+    [color(102, 0, 51), color(255, 51, 153)]
+  ];
 
   createCanvas(VIS_COLUMNS, VIS_ROWS);
   background(0);
@@ -43,15 +56,15 @@ function draw() {
   tick();
 }
 
-function cell(colony, strength, health, age, sex) {
+function cell(colony, strength, health, age) {
   // Cell "class"
   this.colony = colony;
   this.strength = strength;
   this.health = health;
   this.age = age;
-  this.sex = sex;
+  this.sex = 0 // rand_int(0, 1);
   this.gsb = 0;  // gsb = gens since breeding
-  this.colour = COLONIES[colony][sex];
+  this.colour = COLONIES[colony][this.sex];
 }
 
 function rand_int(min, max) {
@@ -67,25 +80,34 @@ function init_cells() {
     cells.push(clmns);
   }
   for (var i = 0; i < 10; i++) {
-    var sex = rand_int(0, 1);
-    cells[0][i] = new cell(0, 5, 10, 0, sex);
+    cells[0][i] = new cell(0, 5, 10, 0);
   }
-  for (var i = 0; i < 10; i++) {
-    var sex = rand_int(0, 1);
-    cells[CA_ROWS-1][i] = new cell(1, 5, 10, 0, sex);
-  }
-  for (var i = 0; i < 10; i++) {
-    var sex = rand_int(0, 1);
-    cells[(CA_ROWS/2)-5+i][CA_COLUMNS-1] = new cell(2, 5, 10, 0, sex);
-  }
+  // for (var i = 0; i < 10; i++) {
+  //   cells[CA_ROWS-1][i] = new cell(1, 5, 10, 0);
+  // }
+  // for (var i = 1; i < 11; i++) {
+  //   cells[0][CA_COLUMNS-i] = new cell(2, 5, 10, 0);
+  // }
+  // for (var i = 1; i < 11; i++) {
+  //   cells[CA_ROWS-1][CA_COLUMNS-i] = new cell(3, 5, 10, 0);
+  // }
 }
 
 /*
   NEIGHBOUR FUNCTIONS
 */
 function neighbouring_cells(r, c) {
-  return [[r-1, c-1], [r-1, c], [r-1, c+1], [r, c-1], [r, c+1],
-          [r+1, c-1], [r+1, c], [r+1, c+1]];
+  // Returns neighbours in random order
+  var rn = [];
+  var n = [[r-1, c-1], [r-1, c], [r-1, c+1],
+           [r, c-1], [r, c+1],
+           [r+1, c-1], [r+1, c], [r+1, c+1]];
+  var nl = n.length;
+  for (var i = 0; i < nl; i++) {
+    var ri = rand_int(0, n.length-1);
+    rn.push(n.splice(ri, 1)[0]);
+  }
+  return rn;
 }
 
 function get_male_neighbour(r, c, colony) {
@@ -128,7 +150,8 @@ function get_neighbouring_enemy(r, c, colony) {
 */
 
 function tick() {
-  // Breeding stage (mutations not implemented yet)
+  // Breeding stage (mutations need fixing)
+  var breeding_change = [];
   for (var r = 0; r < CA_ROWS; r++) {
     for (var c = 0; c < CA_COLUMNS; c++) {
       var cc = cells[r][c];  // cc = current cell
@@ -148,14 +171,21 @@ function tick() {
               e_health += rand_int(-MUT_RANGE, MUT_RANGE);
             }
 
-            var e_sex = rand_int(0, 1);
-            cells[en[0]][en[1]] = new cell(cc.colony, e_strength, e_health, 0, e_sex);
+            breeding_change.push([en[0], en[1], cc.colony, e_strength, e_health, 0]);
           }
         }
       }
     }
   }
+  // // Create cells after calculations to prevent skew to left
+  for (var i = 0; i < breeding_change.length; i++) {
+    var breeding_arr = breeding_change[i];
+    cells[breeding_arr[0]][breeding_arr[1]] = new cell(breeding_arr[2], breeding_arr[3], breeding_arr[4], breeding_arr[5]);
+  }
+  // END
+
   // Fighting stage
+  var cells_to_kill = []
   for (var r = 0; r < CA_ROWS; r++) {
     for (var c = 0; c < CA_COLUMNS; c++) {
       var cc = cells[r][c];
@@ -166,18 +196,43 @@ function tick() {
           cc.health -= en_c.strength;
           en_c.health -= cc.strength;
           if (cc.health <= 0) {
-            // Remove cell object from array
-            cells[r][c] = 0;
+            cells_to_kill.push([r, c]);
           }
           if (en_c.health <= 0) {
-            cells[en[0]][en[1]] = 0;
+            cells_to_kill.push([en[0], en[1]]);
           }
         }
       }
     }
   }
+  // // Destroy cells after calculations to prevent skew to left
+  for (var i = 0; i < cells_to_kill.length; i++) {
+    cells[cells_to_kill[i][0]][cells_to_kill[i][1]] = 0;
+  }
+  // END
+
+  // Moving Stage
+  // // EXPERIMENTAL - Currently killing off cells of the same colony when they try and move into the same spot(?), eachother(?)
+  var moving_cells = [];
+  for (var r = 0; r < CA_ROWS; r++) {
+    for (var c = 0; c < CA_COLUMNS; c++) {
+      if (cells[r][c] != 0) {
+        var en = get_empty_neighbour(r, c);
+        if (en) {
+          moving_cells.push([[en[0], en[1]], [r, c]]);
+        }
+      }
+    }
+  }
+  // // Move after calculations to prevent skew to left
+  for (var i = 0; i < moving_cells.length; i++) {
+    cells[moving_cells[i][0][0]][moving_cells[i][0][1]] = cells[moving_cells[i][1][0]][moving_cells[i][1][1]];
+    cells[moving_cells[i][1][0]][moving_cells[i][1][1]] = 0;
+  }
+  // END
+
   // For each colony, amount of cells, total strength, total health, total age (also age all cells by 1 gen)
-  var colony_totals = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
+  var colony_totals = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
   for (var r = 0; r < CA_ROWS; r++) {
     for (var c = 0; c < CA_COLUMNS; c++) {
       var cc = cells[r][c];
@@ -190,8 +245,11 @@ function tick() {
       }
     }
   }
-  document.getElementById("stat0").innerHTML = "Colony 0: Alive: " + colony_totals[0][0] + " Avg str: " + int(colony_totals[0][1]/colony_totals[0][0]) + " Avg health: " + int(colony_totals[0][2]/colony_totals[0][0]) + " Avg age: " + int(colony_totals[0][3]/colony_totals[0][0]);
-  document.getElementById("stat1").innerHTML = "Colony 1: Alive: " + colony_totals[1][0] + " Avg str: " + int(colony_totals[1][1]/colony_totals[1][0]) + " Avg health: " + int(colony_totals[1][2]/colony_totals[1][0]) + " Avg age: " + int(colony_totals[1][3]/colony_totals[1][0]);
-  document.getElementById("stat2").innerHTML = "Colony 2: Alive: " + colony_totals[2][0] + " Avg str: " + int(colony_totals[2][1]/colony_totals[2][0]) + " Avg health: " + int(colony_totals[2][2]/colony_totals[2][0]) + " Avg age: " + int(colony_totals[2][3]/colony_totals[2][0]);
+  // END
+
+  document.getElementById("stat0").innerHTML = "Colony Orange : Alive: " + colony_totals[0][0] + " Avg str: " + int(colony_totals[0][1]/colony_totals[0][0]) + " Avg health: " + int(colony_totals[0][2]/colony_totals[0][0]) + " Avg age: " + int(colony_totals[0][3]/colony_totals[0][0]);
+  document.getElementById("stat1").innerHTML = "Colony Green  : Alive: " + colony_totals[1][0] + " Avg str: " + int(colony_totals[1][1]/colony_totals[1][0]) + " Avg health: " + int(colony_totals[1][2]/colony_totals[1][0]) + " Avg age: " + int(colony_totals[1][3]/colony_totals[1][0]);
+  document.getElementById("stat2").innerHTML = "Colony Blue   : Alive: " + colony_totals[2][0] + " Avg str: " + int(colony_totals[2][1]/colony_totals[2][0]) + " Avg health: " + int(colony_totals[2][2]/colony_totals[2][0]) + " Avg age: " + int(colony_totals[2][3]/colony_totals[2][0]);
+  document.getElementById("stat3").innerHTML = "Colony Pink   : Alive: " + colony_totals[3][0] + " Avg str: " + int(colony_totals[3][1]/colony_totals[3][0]) + " Avg health: " + int(colony_totals[3][2]/colony_totals[3][0]) + " Avg age: " + int(colony_totals[3][3]/colony_totals[3][0]);
   GEN++;
 }
