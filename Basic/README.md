@@ -1,1 +1,1 @@
-http://mathworld.wolfram.com/Rule90.html
+From http://mathworld.wolfram.com/Rule90.html
