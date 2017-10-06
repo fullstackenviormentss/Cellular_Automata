@@ -1,4 +1,6 @@
-# Cellular_Automata
+---
+![cellular automata](https://github.com/Cutwell/Cellular_Automata/blob/master/ca_logo.png?raw=true "cellular automata")
+---
 
 Various 2D cellular automata. All scripts are designed to be run in the terminal
 
