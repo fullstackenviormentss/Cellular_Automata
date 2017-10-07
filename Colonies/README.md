@@ -36,5 +36,5 @@ Each generation is worked out like this:
 
 ## Demos
 
-p5.js -> Demo in p5.js | https://thatguywiththatname.github.io/Cellular_Autonoma/Colonies/p5.js/index.html
+p5.js -> Demo in p5.js | https://thatguywiththatname.github.io/Cellular_Automata/Colonies/p5.js/index.html
  - The brighter a cell is, the stronger it is. It is possible for darker cells to beat lighter cells because they could have very high health.
