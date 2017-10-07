@@ -5,30 +5,39 @@
     <script src="sketch.js"></script>
     <style>
     body {
-      font:normal 10px Courier,Arial,sans-serif;
-      white-space:pre;
+      font: normal 10px Courier,Arial,sans-serif;
+      white-space: pre;
     }
     #genh1 {
-      position:absolute;
-      top:0px;
-      left:820px;
+      position: absolute;
+      top: 0px;
+      left: 820px;
       font-size: 25px;
       padding: 10px;
     }
     #stat0 {
+      position: absolute;
+      top: 75px;
+      left: 855px;
+    }
+    #reload_btn {
       position:absolute;
-      top:75px;
-      left:855px;
+      width: 200px;
+      height: 50px;
+      top: 580px;
+      left: 855px;
+      border-radius: 10px;
     }
     #defaultCanvas0 {
       position: absolute;
-      top:0px;
-      left:0px;
+      top: 0px;
+      left: 0px;
     }
     </style>
   </head>
   <body>
     <h1 id="genh1">Generation: 0</h1>
     <h2 id="stat0">Stats go here</h2>
+    <button id="reload_btn" onclick="setup()">Reload</button>
   </body>
 </html>
