@@ -1,11 +1,3 @@
-/*
-
-Things to change back after moving fixed:
- - change new cell sex back to random chance
- - un-comment all initially spawned cells
-
-*/
-
 // In this script, 0 = male, 1 = female
 var MALE = 0;
 var FEMALE = 1;
@@ -15,26 +7,26 @@ var MUT_RANGE = 5; // cells health & strength can change from -MUT_RANGE to MUT_
 
 var cells = [];
 var GEN = 0;
-var CA = 100 // CA grid is CAxCA then upscaled to VIS (so CA*CA amount of cells)
+var CA = 40 // CA grid is CAxCA then upscaled to VIS (so CA*CA amount of cells)
 var VIS = 800; // Visual grid is VISxVIS (VIS*VIS amount of pixels)
 
 function setup() {
   // Variables that need to be re-initialized when setup() is called
+  // CA_ROWS and CA_COLUMNS could be one variable but are named for clarity
   CA_ROWS = CA;
   CA_COLUMNS = CA;
-  VIS_ROWS = VIS;
-  VIS_COLUMNS = VIS;
-  CELL_SIZE = VIS_ROWS/CA_ROWS;
+  CELL_SIZE = VIS/CA;
 
   // 2 colours per colony, for male & female. Female = lighter
   COLONIES = [
-    [color(204, 102, 0), color(204, 155, 0)],
-    [color(146, 141, 0), color(146, 197, 0)],
-    [color(84, 24, 203), color(84, 183, 203)],
-    [color(102, 0, 51), color(255, 51, 153)]
+    [40, 78, 10],
+    [93, 78, 10],
+    [220, 78, 10],
+    [301, 78, 10]
   ];
 
-  createCanvas(VIS_COLUMNS, VIS_ROWS);
+  colorMode(HSB); // Set color() to use HSB
+  createCanvas(VIS, VIS);
   background(0);
   noSmooth();
   noStroke();
@@ -56,15 +48,20 @@ function draw() {
   tick();
 }
 
-function cell(colony, strength, health, age) {
+function cell(colony, strength, health) {
   // Cell "class"
   this.colony = colony;
   this.strength = strength;
   this.health = health;
-  this.age = age;
-  this.sex = 0 // rand_int(0, 1);
+  this.age = 0;
+  this.sex = rand_int(0, 1);
   this.gsb = 0;  // gsb = gens since breeding
-  this.colour = COLONIES[colony][this.sex];
+
+  let base = COLONIES[colony];
+  // for (i=0; i<3; i++) {
+  //   base[i] += strength;
+  // }
+  this.colour = color(base[0], base[1], base[2] + (strength*2));
 }
 
 function rand_int(min, max) {
@@ -80,17 +77,17 @@ function init_cells() {
     cells.push(clmns);
   }
   for (var i = 0; i < 10; i++) {
-    cells[0][i] = new cell(0, 5, 10, 0);
+    cells[0][i] = new cell(0, 5, 10);
   }
-  // for (var i = 0; i < 10; i++) {
-  //   cells[CA_ROWS-1][i] = new cell(1, 5, 10, 0);
-  // }
-  // for (var i = 1; i < 11; i++) {
-  //   cells[0][CA_COLUMNS-i] = new cell(2, 5, 10, 0);
-  // }
-  // for (var i = 1; i < 11; i++) {
-  //   cells[CA_ROWS-1][CA_COLUMNS-i] = new cell(3, 5, 10, 0);
-  // }
+  for (var i = 0; i < 10; i++) {
+    cells[CA_ROWS-1][i] = new cell(1, 5, 10);
+  }
+  for (var i = 1; i < 11; i++) {
+    cells[0][CA_COLUMNS-i] = new cell(2, 5, 10);
+  }
+  for (var i = 1; i < 11; i++) {
+    cells[CA_ROWS-1][CA_COLUMNS-i] = new cell(3, 5, 10);
+  }
 }
 
 /*
@@ -168,19 +165,19 @@ function tick() {
             var e_health = cc.health;
             if (rand_int(0, MUATTION_CHANCE) == 0 && e_strength >= MUT_RANGE && e_health > MUT_RANGE) {
               e_strength += rand_int(-MUT_RANGE, MUT_RANGE);
-              e_health += rand_int(-MUT_RANGE, MUT_RANGE);
+              // e_health += rand_int(-MUT_RANGE, MUT_RANGE);
             }
 
-            breeding_change.push([en[0], en[1], cc.colony, e_strength, e_health, 0]);
+            breeding_change.push([en[0], en[1], cc.colony, e_strength, e_health]);
           }
         }
       }
     }
   }
-  // // Create cells after calculations to prevent skew to left
+  //// Create cells after calculations to prevent skew to left
   for (var i = 0; i < breeding_change.length; i++) {
     var breeding_arr = breeding_change[i];
-    cells[breeding_arr[0]][breeding_arr[1]] = new cell(breeding_arr[2], breeding_arr[3], breeding_arr[4], breeding_arr[5]);
+    cells[breeding_arr[0]][breeding_arr[1]] = new cell(breeding_arr[2], breeding_arr[3], breeding_arr[4]);
   }
   // END
 
@@ -205,29 +202,9 @@ function tick() {
       }
     }
   }
-  // // Destroy cells after calculations to prevent skew to left
+  //// Destroy cells after calculations to prevent skew to left
   for (var i = 0; i < cells_to_kill.length; i++) {
     cells[cells_to_kill[i][0]][cells_to_kill[i][1]] = 0;
-  }
-  // END
-
-  // Moving Stage
-  // // EXPERIMENTAL - Currently killing off cells of the same colony when they try and move into the same spot(?), eachother(?)
-  var moving_cells = [];
-  for (var r = 0; r < CA_ROWS; r++) {
-    for (var c = 0; c < CA_COLUMNS; c++) {
-      if (cells[r][c] != 0) {
-        var en = get_empty_neighbour(r, c);
-        if (en) {
-          moving_cells.push([[en[0], en[1]], [r, c]]);
-        }
-      }
-    }
-  }
-  // // Move after calculations to prevent skew to left
-  for (var i = 0; i < moving_cells.length; i++) {
-    cells[moving_cells[i][0][0]][moving_cells[i][0][1]] = cells[moving_cells[i][1][0]][moving_cells[i][1][1]];
-    cells[moving_cells[i][1][0]][moving_cells[i][1][1]] = 0;
   }
   // END
 
@@ -247,9 +224,10 @@ function tick() {
   }
   // END
 
-  document.getElementById("stat0").innerHTML = "Colony Orange : Alive: " + colony_totals[0][0] + " Avg str: " + int(colony_totals[0][1]/colony_totals[0][0]) + " Avg health: " + int(colony_totals[0][2]/colony_totals[0][0]) + " Avg age: " + int(colony_totals[0][3]/colony_totals[0][0]);
-  document.getElementById("stat1").innerHTML = "Colony Green  : Alive: " + colony_totals[1][0] + " Avg str: " + int(colony_totals[1][1]/colony_totals[1][0]) + " Avg health: " + int(colony_totals[1][2]/colony_totals[1][0]) + " Avg age: " + int(colony_totals[1][3]/colony_totals[1][0]);
-  document.getElementById("stat2").innerHTML = "Colony Blue   : Alive: " + colony_totals[2][0] + " Avg str: " + int(colony_totals[2][1]/colony_totals[2][0]) + " Avg health: " + int(colony_totals[2][2]/colony_totals[2][0]) + " Avg age: " + int(colony_totals[2][3]/colony_totals[2][0]);
-  document.getElementById("stat3").innerHTML = "Colony Pink   : Alive: " + colony_totals[3][0] + " Avg str: " + int(colony_totals[3][1]/colony_totals[3][0]) + " Avg health: " + int(colony_totals[3][2]/colony_totals[3][0]) + " Avg age: " + int(colony_totals[3][3]/colony_totals[3][0]);
+  // This could probably be optimised
+  document.getElementById("stat0").innerHTML = "Colony Orange\n\n\tAlive      | " + colony_totals[0][0] + "\n\tAvg str    | " + int(colony_totals[0][1]/colony_totals[0][0]) + "\n\tAvg health | " + int(colony_totals[0][2]/colony_totals[0][0]) + "\n\tAvg age    | " + int(colony_totals[0][3]/colony_totals[0][0]) +
+  "\n\n\nColony Green\n\n\tAlive      | " + colony_totals[1][0] + "\n\tAvg str    | " + int(colony_totals[1][1]/colony_totals[1][0]) + "\n\tAvg health | " + int(colony_totals[1][2]/colony_totals[1][0]) + "\n\tAvg age    | " + int(colony_totals[1][3]/colony_totals[1][0]) +
+  "\n\n\nColony Blue\n\n\tAlive      | " + colony_totals[2][0] + "\n\tAvg str    | " + int(colony_totals[2][1]/colony_totals[2][0]) + "\n\tAvg health | " + int(colony_totals[2][2]/colony_totals[2][0]) + "\n\tAvg age    | " + int(colony_totals[2][3]/colony_totals[2][0]) +
+  "\n\n\nColony Pink\n\n\tAlive      | " + colony_totals[3][0] + "\n\tAvg str    | " + int(colony_totals[3][1]/colony_totals[3][0]) + "\n\tAvg health | " + int(colony_totals[3][2]/colony_totals[3][0]) + "\n\tAvg age    | " + int(colony_totals[3][3]/colony_totals[3][0]);
   GEN++;
 }
