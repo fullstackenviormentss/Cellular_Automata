@@ -2,12 +2,12 @@
 var MALE = 0;
 var FEMALE = 1;
 var BREEDING_DELAY = 1;  // waits this amount of gens before breeding again
-var MUATTION_CHANCE = 1;  // 1/MUATTION_CHANCE+1 chance of new cells mutating
+var MUTATION_CHANCE = 1;  // 1/MUTATION_CHANCE+1 chance of new cells mutating
 var MUT_RANGE = 5; // cells health & strength can change from -MUT_RANGE to MUT_RANGE
 
 var cells = [];
 var GEN = 0;
-var CA = 40 // CA grid is CAxCA then upscaled to VIS (so CA*CA amount of cells)
+var CA = 60 // CA grid is CAxCA then upscaled to VIS (so CA*CA amount of cells)
 var VIS = 800; // Visual grid is VISxVIS (VIS*VIS amount of pixels)
 
 function setup() {
@@ -57,11 +57,13 @@ function cell(colony, strength, health) {
   this.sex = rand_int(0, 1);
   this.gsb = 0;  // gsb = gens since breeding
 
+  // Brightness depends on strength
   let base = COLONIES[colony];
-  // for (i=0; i<3; i++) {
-  //   base[i] += strength;
-  // }
-  this.colour = color(base[0], base[1], base[2] + (strength*2));
+  if ((base[2] + (strength*2)) > 255) {
+    this.colour = color(base[0], base[1], 255);
+  } else {
+    this.colour = color(base[0], base[1], base[2] + (strength*2));
+  }
 }
 
 function rand_int(min, max) {
@@ -162,13 +164,15 @@ function tick() {
 
             // Mutation
             var e_strength = cc.strength;
-            var e_health = cc.health;
-            if (rand_int(0, MUATTION_CHANCE) == 0 && e_strength >= MUT_RANGE && e_health > MUT_RANGE) {
-              e_strength += rand_int(-MUT_RANGE, MUT_RANGE);
-              // e_health += rand_int(-MUT_RANGE, MUT_RANGE);
+            if (rand_int(0, MUTATION_CHANCE) == 0) {
+              if (e_strength > 0) {
+                e_strength += [-1, 1][rand_int(0, 1)];
+              } else {
+                e_strength += 1;
+              }
             }
 
-            breeding_change.push([en[0], en[1], cc.colony, e_strength, e_health]);
+            breeding_change.push([en[0], en[1], cc.colony, e_strength, cc.health]);
           }
         }
       }
@@ -209,7 +213,7 @@ function tick() {
   // END
 
   // For each colony, amount of cells, total strength, total health, total age (also age all cells by 1 gen)
-  var colony_totals = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]];
+  var colony_totals = [[0, 0, 0], [0, 0, 0], [0, 0, 0], [0, 0, 0]];
   for (var r = 0; r < CA_ROWS; r++) {
     for (var c = 0; c < CA_COLUMNS; c++) {
       var cc = cells[r][c];
@@ -217,17 +221,16 @@ function tick() {
         cells[r][c].age += 1;
         colony_totals[cc.colony][0] += 1;
         colony_totals[cc.colony][1] += cc.strength;
-        colony_totals[cc.colony][2] += cc.health;
-        colony_totals[cc.colony][3] += cc.age;
+        colony_totals[cc.colony][2] += cc.age;
       }
     }
   }
   // END
 
   // This could probably be optimised
-  document.getElementById("stat0").innerHTML = "Colony Orange\n\n\tAlive      | " + colony_totals[0][0] + "\n\tAvg str    | " + int(colony_totals[0][1]/colony_totals[0][0]) + "\n\tAvg health | " + int(colony_totals[0][2]/colony_totals[0][0]) + "\n\tAvg age    | " + int(colony_totals[0][3]/colony_totals[0][0]) +
-  "\n\n\nColony Green\n\n\tAlive      | " + colony_totals[1][0] + "\n\tAvg str    | " + int(colony_totals[1][1]/colony_totals[1][0]) + "\n\tAvg health | " + int(colony_totals[1][2]/colony_totals[1][0]) + "\n\tAvg age    | " + int(colony_totals[1][3]/colony_totals[1][0]) +
-  "\n\n\nColony Blue\n\n\tAlive      | " + colony_totals[2][0] + "\n\tAvg str    | " + int(colony_totals[2][1]/colony_totals[2][0]) + "\n\tAvg health | " + int(colony_totals[2][2]/colony_totals[2][0]) + "\n\tAvg age    | " + int(colony_totals[2][3]/colony_totals[2][0]) +
-  "\n\n\nColony Pink\n\n\tAlive      | " + colony_totals[3][0] + "\n\tAvg str    | " + int(colony_totals[3][1]/colony_totals[3][0]) + "\n\tAvg health | " + int(colony_totals[3][2]/colony_totals[3][0]) + "\n\tAvg age    | " + int(colony_totals[3][3]/colony_totals[3][0]);
+  document.getElementById("stat0").innerHTML ="Colony Orange\n\n\tAlive   | " + colony_totals[0][0] + "\n\tAvg str | " + int(colony_totals[0][1]/colony_totals[0][0]) + "\n\tAvg age | " + int(colony_totals[0][2]/colony_totals[0][0]) +
+  "\n\n\nColony Green\n\n\tAlive   | " + colony_totals[1][0] + "\n\tAvg str | " + int(colony_totals[1][1]/colony_totals[1][0]) + "\n\tAvg age | " + int(colony_totals[1][2]/colony_totals[1][0]) +
+  "\n\n\nColony Blue\n\n\tAlive   | " + colony_totals[2][0] + "\n\tAvg str | " + int(colony_totals[2][1]/colony_totals[2][0]) + "\n\tAvg age | " + int(colony_totals[2][2]/colony_totals[2][0]) +
+  "\n\n\nColony Pink\n\n\tAlive   | " + colony_totals[3][0] + "\n\tAvg str | " + int(colony_totals[3][1]/colony_totals[3][0]) + "\n\tAvg age | " + int(colony_totals[3][2]/colony_totals[3][0]);
   GEN++;
 }
