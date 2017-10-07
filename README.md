@@ -1,5 +1,5 @@
 ---
-![cellular automata](https://github.com/Cutwell/Cellular_Automata/blob/master/ca_logo.png?raw=true "cellular automata")
+![logo](ca_logo.png)
 ---
 
 Various 2D cellular automata. All scripts are designed to be run in the terminal
