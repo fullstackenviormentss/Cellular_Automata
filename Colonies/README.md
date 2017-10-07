@@ -36,5 +36,5 @@ Each generation is worked out like this:
 
 ## Demos
 
-p5.js -> Demo in p5.js | https://thatguywiththatname.github.io/Cellular_Autonoma/Colonies/p5.js/index.html
+p5.js -> Demo in p5.js | https://thatguywiththatname.github.io/Cellular_Automata/Colonies/p5.js/index.html
  - colonies: 0 = orange, 1 = green, 2 = blue
