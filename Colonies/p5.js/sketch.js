@@ -1,9 +1,5 @@
 function setup() {
-  // In this script, 0 = male, 1 = female
-  MALE = 0;
-  FEMALE = 1;
-  MUTATION_CHANCE = 1;  // 1/MUTATION_CHANCE+1 chance of new cells mutating
-
+  MUTATION_CHANCE = 1; // 1/MUTATION_CHANCE+1 chance of new cells mutating
   cells = [];
   GEN = 0;
   CA = 60 // CA grid is CAxCA then upscaled to VIS (so CA*CA amount of cells)
@@ -51,7 +47,6 @@ function cell(colony, strength, health) {
   this.strength = strength;
   this.health = health;
   this.age = 0;
-  this.sex = rand_int(0, 1);
 
   // Brightness depends on strength
   let base = COLONIES[colony];
@@ -103,18 +98,6 @@ function neighbouring_cells(r, c) {
   return rn;
 }
 
-function get_male_neighbour(r, c, colony) {
-  let n = neighbouring_cells(r, c);
-  for (let i = 0; i < n.length; i++) {
-    if (n[i][0] != -1 && n[i][1] != -1 && n[i][0] != CA_ROWS && n[i][1] != CA_COLUMNS && cells[n[i][0]][n[i][1]] != 0) {
-      if (cells[n[i][0]][n[i][1]].sex == MALE && cells[n[i][0]][n[i][1]].colony == colony) {
-        return n[i];
-      }
-    }
-  }
-  return false;
-}
-
 function get_empty_neighbour(r, c) {
   let n = neighbouring_cells(r, c);
   for (let i = 0; i < n.length; i++) {
@@ -141,38 +124,35 @@ function get_neighbouring_enemy(r, c, colony) {
 // END
 
 function tick() {
-  // Breeding stage
-  let breeding_change = [];
+  // Mitosis stage
+  let mitosis_changed = [];
   for (let r = 0; r < CA_ROWS; r++) {
     for (let c = 0; c < CA_COLUMNS; c++) {
       let cc = cells[r][c];  // cc = current cell
       if (cc != 0) {
-        if (cc.sex == FEMALE) {
-          let mn = get_male_neighbour(r, c, cc.colony);
-          let en = get_empty_neighbour(r, c);
-          if (mn && en) {
-            // Chlid mutation
-            let e_strength = cc.strength;
-            if (!rand_int(0, MUTATION_CHANCE)) {
-              if (e_strength == 0) {
-                e_strength += 1;
-              } else if (e_strength == 100) {
-                e_strength -= 1;
-              } else {
-                // Otherwise, random mutation
-                e_strength += [-1, 1][rand_int(0, 1)];
-              }
+        let en = get_empty_neighbour(r, c);
+        if (en) {
+          // Child mutation
+          let e_strength = cc.strength;
+          if (!rand_int(0, MUTATION_CHANCE)) {
+            if (e_strength == 0) {
+              e_strength += 1;
+            } else if (e_strength == 100) {
+              e_strength -= 1;
+            } else {
+              // Otherwise, random mutation
+              e_strength += [-1, 1][rand_int(0, 1)];
             }
-            breeding_change.push([en[0], en[1], cc.colony, e_strength, cc.health]);
           }
+          mitosis_changed.push([en[0], en[1], cc.colony, e_strength, cc.health]);
         }
       }
     }
   }
-  // // Create cells after calculations to prevent skew to left
-  for (let i = 0; i < breeding_change.length; i++) {
-    let breeding_arr = breeding_change[i];
-    cells[breeding_arr[0]][breeding_arr[1]] = new cell(breeding_arr[2], breeding_arr[3], breeding_arr[4]);
+  // // Create cells after calculations to prevent skew
+  for (let i = 0; i < mitosis_changed.length; i++) {
+    let mitosis_arr = mitosis_changed[i];
+    cells[mitosis_arr[0]][mitosis_arr[1]] = new cell(mitosis_arr[2], mitosis_arr[3], mitosis_arr[4]);
   }
   // END
 
@@ -197,7 +177,7 @@ function tick() {
       }
     }
   }
-  // // Destroy cells after calculations to prevent skew to left
+  // // Destroy cells after calculations to prevent skew
   for (let i = 0; i < cells_to_kill.length; i++) {
     cells[cells_to_kill[i][0]][cells_to_kill[i][1]] = 0;
   }
