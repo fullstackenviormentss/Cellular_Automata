@@ -5,6 +5,9 @@ function setup() {
   CA = 60 // CA grid is CAxCA then upscaled to VIS (so CA*CA amount of cells)
   VIS = 800; // Visual grid is VISxVIS (VIS*VIS amount of pixels)
 
+  DEFAULT_STRENGTH = 5;
+  DEFAULT_HEALTH = 10;
+
   // CA_ROWS and CA_COLUMNS could be one variable but are different for clarity
   CA_ROWS = CA;
   CA_COLUMNS = CA;
@@ -50,15 +53,16 @@ function cell(colony, strength, health) {
 
   // Brightness depends on strength
   let base = COLONIES[colony];
-  if ((base[2] + (strength*2)) > 100) {
+  let brightness = strength * 2;
+  if ((base[2] + brightness) > 100) {
     this.colour = color(base[0], base[1], 100);
   } else {
-    this.colour = color(base[0], base[1], base[2] + (strength*2));
+    this.colour = color(base[0], base[1], base[2] + brightness);
   }
 }
 
 function rand_int(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 function init_cells() {
@@ -70,16 +74,16 @@ function init_cells() {
     cells.push(clmns);
   }
   for (let i = 0; i < 10; i++) {
-    cells[0][i] = new cell(0, 5, 10);
+    cells[0][i] = new cell(0, DEFAULT_STRENGTH, DEFAULT_HEALTH);
   }
   for (let i = 0; i < 10; i++) {
-    cells[CA_ROWS-1][i] = new cell(1, 5, 10);
+    cells[CA_ROWS-1][i] = new cell(1, DEFAULT_STRENGTH, DEFAULT_HEALTH);
   }
   for (let i = 1; i < 11; i++) {
-    cells[0][CA_COLUMNS-i] = new cell(2, 5, 10);
+    cells[0][CA_COLUMNS-i] = new cell(2, DEFAULT_STRENGTH, DEFAULT_HEALTH);
   }
   for (let i = 1; i < 11; i++) {
-    cells[CA_ROWS-1][CA_COLUMNS-i] = new cell(3, 5, 10);
+    cells[CA_ROWS-1][CA_COLUMNS-i] = new cell(3, DEFAULT_STRENGTH, DEFAULT_HEALTH);
   }
 }
 
@@ -144,7 +148,7 @@ function tick() {
               e_strength += [-1, 1][rand_int(0, 1)];
             }
           }
-          mitosis_changed.push([en[0], en[1], cc.colony, e_strength, cc.health]);
+          mitosis_changed.push([en[0], en[1], cc.colony, e_strength]);
         }
       }
     }
@@ -152,7 +156,7 @@ function tick() {
   // // Create cells after calculations to prevent skew
   for (let i = 0; i < mitosis_changed.length; i++) {
     let mitosis_arr = mitosis_changed[i];
-    cells[mitosis_arr[0]][mitosis_arr[1]] = new cell(mitosis_arr[2], mitosis_arr[3], mitosis_arr[4]);
+    cells[mitosis_arr[0]][mitosis_arr[1]] = new cell(mitosis_arr[2], mitosis_arr[3], DEFAULT_HEALTH);
   }
   // END
 
