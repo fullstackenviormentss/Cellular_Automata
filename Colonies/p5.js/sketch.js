@@ -1,10 +1,15 @@
+function slider_changed() {
+  document.getElementById("colony_amount_h2").innerHTML = "Number of colonies: ("+document.getElementById("colony_amount").value+")";
+}
+
 function setup() {
-  MUTATION_CHANCE = 1; // 1/MUTATION_CHANCE+1 chance of new cells mutating
   cells = [];
   GEN = 0;
+
   CA = 60 // CA grid is CAxCA then upscaled to VIS (so CA*CA amount of cells)
   VIS = 800; // Visual grid is VISxVIS (VIS*VIS amount of pixels)
 
+  MUTATION_CHANCE = 1; // 1/MUTATION_CHANCE+1 chance of new cells mutating
   DEFAULT_STRENGTH = 5;
   DEFAULT_HEALTH = 10;
 
@@ -13,12 +18,12 @@ function setup() {
   CA_COLUMNS = CA;
   CELL_SIZE = VIS/CA;
 
-  // HSB colors for each colony (orange, green, blue, pink)
+  // HSB colors for each colony
   COLONIES = [
-    [40, 78, 10],
-    [93, 78, 10],
-    [220, 78, 10],
-    [301, 78, 10]
+    [40, 100, 10],  // Orage
+    [93, 100, 10],  // Green
+    [220, 100, 10], // Blue
+    [301, 100, 10]  // Pink
   ];
 
   colorMode(HSB); // Set color() to use HSB
@@ -44,6 +49,10 @@ function draw() {
   tick();
 }
 
+function rand_int(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
 function cell(colony, strength, health) {
   // Cell "class"
   this.colony = colony;
@@ -61,8 +70,13 @@ function cell(colony, strength, health) {
   }
 }
 
-function rand_int(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
+function create_cells(coord_arr) {
+  let colony_count = 0;
+  let num_of_colonies = document.getElementById("colony_amount").value;
+  for (let i = 0; i < num_of_colonies*2; i = i+2) {
+    cells[coord_arr[i]][coord_arr[i+1]] = new cell(colony_count, DEFAULT_STRENGTH, DEFAULT_HEALTH);
+    colony_count++;
+  }
 }
 
 function init_cells() {
@@ -73,10 +87,20 @@ function init_cells() {
     }
     cells.push(clmns);
   }
-  cells[0][0] = new cell(0, DEFAULT_STRENGTH, DEFAULT_HEALTH);
-  cells[CA_ROWS-1][0] = new cell(1, DEFAULT_STRENGTH, DEFAULT_HEALTH);
-  cells[0][CA_COLUMNS-1] = new cell(2, DEFAULT_STRENGTH, DEFAULT_HEALTH);
-  cells[CA_ROWS-1][CA_COLUMNS-1] = new cell(3, DEFAULT_STRENGTH, DEFAULT_HEALTH);
+
+  if (document.getElementById("r_p_checkbox").checked) {
+    // Random placement
+    var coords_arr = []
+    while (coords_arr.length < 8) {
+        var random_number = rand_int(0, CA-1);
+        if(coords_arr.indexOf(random_number) > -1) continue;
+        coords_arr.push(random_number);
+    }
+    create_cells(coords_arr);
+  }
+  else {
+    create_cells([0, 0, CA_ROWS-1, 0, 0, CA_COLUMNS-1, CA_ROWS-1, CA_COLUMNS-1]);
+  }
 }
 
 // NEIGHBOUR FUNCTIONS
@@ -173,7 +197,7 @@ function tick() {
       }
     }
   }
-  // // Destroy cells after calculations to prevent skew
+  // // Destroy cells after calculations to try and prevent skew (still slightly skewed toward moving upwards)
   for (let i = 0; i < cells_to_kill.length; i++) {
     cells[cells_to_kill[i][0]][cells_to_kill[i][1]] = 0;
   }
