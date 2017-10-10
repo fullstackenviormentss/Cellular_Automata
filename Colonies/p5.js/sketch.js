@@ -73,18 +73,10 @@ function init_cells() {
     }
     cells.push(clmns);
   }
-  for (let i = 0; i < 10; i++) {
-    cells[0][i] = new cell(0, DEFAULT_STRENGTH, DEFAULT_HEALTH);
-  }
-  for (let i = 0; i < 10; i++) {
-    cells[CA_ROWS-1][i] = new cell(1, DEFAULT_STRENGTH, DEFAULT_HEALTH);
-  }
-  for (let i = 1; i < 11; i++) {
-    cells[0][CA_COLUMNS-i] = new cell(2, DEFAULT_STRENGTH, DEFAULT_HEALTH);
-  }
-  for (let i = 1; i < 11; i++) {
-    cells[CA_ROWS-1][CA_COLUMNS-i] = new cell(3, DEFAULT_STRENGTH, DEFAULT_HEALTH);
-  }
+  cells[0][0] = new cell(0, DEFAULT_STRENGTH, DEFAULT_HEALTH);
+  cells[CA_ROWS-1][0] = new cell(1, DEFAULT_STRENGTH, DEFAULT_HEALTH);
+  cells[0][CA_COLUMNS-1] = new cell(2, DEFAULT_STRENGTH, DEFAULT_HEALTH);
+  cells[CA_ROWS-1][CA_COLUMNS-1] = new cell(3, DEFAULT_STRENGTH, DEFAULT_HEALTH);
 }
 
 // NEIGHBOUR FUNCTIONS
