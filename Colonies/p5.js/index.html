@@ -3,18 +3,41 @@
   <head>
     <title>Colonies</title>
     <link href="main.css" rel="stylesheet" media="all">
-    <script src="p5.min.js"></script>
   </head>
   <body>
     <h1 id="genh1">Generation: 0</h1>
-    <h2 id="stat0">Stats go here</h2>
+
+    <div id="colony_stat_grid">
+      <h2 id="colony_orange_h2">
+        Colony Orange
+      </h2>
+      <div class="chart" id="colony_orange_chart"></div>
+      <h2 id="colony_green_h2">
+        Colony Green
+      </h2>
+      <div class="chart" id="colony_green_chart"></div>
+      <h2 id="colony_blue_h2">
+        Colony Blue
+      </h2>
+      <div class="chart" id="colony_blue_chart"></div>
+      <h2 id="colony_pink_h2">
+        Colony Pink
+      </h2>
+      <div class="chart" id="colony_pink_chart"></div>
+    </div>
+
     <button id="reload_btn" onclick="setup()">Reload</button>
-    <div class="grid" id="options-grid">
+
+    <div id="options-grid">
       <h2>Random placement:</h2>
       <input type="checkbox" id="r_p_checkbox">
       <h2 id="colony_amount_h2">Number of colonies: (4)</h2>
       <input type="range" id="colony_amount" value="4" min="1" max="4" onchange="slider_changed()">
     </div>
+
+    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+    <script src="chart_stuff.js"></script>
+    <script src="p5.min.js"></script>
     <script src="sketch.js"></script>
   </body>
 </html>

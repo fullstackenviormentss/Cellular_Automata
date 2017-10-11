@@ -2,14 +2,6 @@ body {
   font: normal 10px Courier,Arial,sans-serif;
   white-space: pre;
 }
-
-.grid {
-  display: grid;
-  grid-template-columns: 100px 100px;
-  grid-column-gap: 30px;
-  grid-row-gap: 0px;
-}
-
 #genh1 {
   position: absolute;
   top: 0px;
@@ -18,27 +10,39 @@ body {
   padding: 10px;
 }
 
-#stat0 {
+#colony_stat_grid {
   position: absolute;
-  top: 75px;
-  left: 855px;
+  display: grid;
+  grid-template-columns: 100px 100px;
+  grid-column-gap: 150px;
+  grid-row-gap: 30px;
+  top: 70px;
+  left: 840px;
+}
+.chart {
+  position: relative;
+  height: 120px;
+  width: 500px;
+  top: 10px;
 }
 
 #reload_btn {
   position:absolute;
   width: 200px;
   height: 50px;
-  top: 580px;
+  top: 670px;
   left: 855px;
   border-radius: 10px;
 }
-
 #options-grid {
   position:absolute;
-  top: 650px;
+  display: grid;
+  grid-template-columns: 100px 100px;
+  grid-column-gap: 30px;
+  grid-row-gap: 0px;
+  top: 730px;
   left: 855px;
 }
-
 #r_p_checkbox {
   position: relative;
   height: 16px;

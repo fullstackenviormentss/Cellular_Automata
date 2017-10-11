@@ -3,6 +3,8 @@ function slider_changed() {
 }
 
 function setup() {
+  load_charts();
+
   cells = [];
   GEN = 0;
 
@@ -218,10 +220,14 @@ function tick() {
   }
   // END
 
-  // This could probably be optimised
-  document.getElementById("stat0").innerHTML ="Colony Orange\n\n\tAlive   | " + colony_totals[0][0] + "\n\tAvg str | " + int(colony_totals[0][1]/colony_totals[0][0]) + "\n\tAvg age | " + int(colony_totals[0][2]/colony_totals[0][0]) +
-  "\n\n\nColony Green\n\n\tAlive   | " + colony_totals[1][0] + "\n\tAvg str | " + int(colony_totals[1][1]/colony_totals[1][0]) + "\n\tAvg age | " + int(colony_totals[1][2]/colony_totals[1][0]) +
-  "\n\n\nColony Blue\n\n\tAlive   | " + colony_totals[2][0] + "\n\tAvg str | " + int(colony_totals[2][1]/colony_totals[2][0]) + "\n\tAvg age | " + int(colony_totals[2][2]/colony_totals[2][0]) +
-  "\n\n\nColony Pink\n\n\tAlive   | " + colony_totals[3][0] + "\n\tAvg str | " + int(colony_totals[3][1]/colony_totals[3][0]) + "\n\tAvg age | " + int(colony_totals[3][2]/colony_totals[3][0]);
+  // Stats
+  document.getElementById("colony_orange_h2").innerHTML = "Colony Orange\n\n\tAlive   | " + colony_totals[0][0] + "\n\tAvg str | " + int(colony_totals[0][1]/colony_totals[0][0]) + "\n\tAvg age | " + int(colony_totals[0][2]/colony_totals[0][0]);
+  document.getElementById("colony_green_h2").innerHTML = "Colony Green\n\n\tAlive   | " + colony_totals[1][0] + "\n\tAvg str | " + int(colony_totals[1][1]/colony_totals[1][0]) + "\n\tAvg age | " + int(colony_totals[1][2]/colony_totals[1][0]);
+  document.getElementById("colony_blue_h2").innerHTML = "Colony Blue\n\n\tAlive   | " + colony_totals[2][0] + "\n\tAvg str | " + int(colony_totals[2][1]/colony_totals[2][0]) + "\n\tAvg age | " + int(colony_totals[2][2]/colony_totals[2][0]);
+  document.getElementById("colony_pink_h2").innerHTML = "Colony Pink\n\n\tAlive   | " + colony_totals[3][0] + "\n\tAvg str | " + int(colony_totals[3][1]/colony_totals[3][0]) + "\n\tAvg age | " + int(colony_totals[3][2]/colony_totals[3][0]);
+  update_chart(ORANGE_DPS, ORANGE_CHART, GEN, colony_totals[0][0]);
+  update_chart(GREEN_DPS, GREEN_CHART, GEN, colony_totals[1][0]);
+  update_chart(BLUE_DPS, BLUE_CHART, GEN, colony_totals[2][0]);
+  update_chart(PINK_DPS, PINK_CHART, GEN, colony_totals[3][0]);
   GEN++;
 }
